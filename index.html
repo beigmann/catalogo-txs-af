@@ -37,7 +37,7 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 .card{position:relative;background:linear-gradient(180deg,#15161d,#0f1015);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:.18s transform,.18s border-color}
 .card:hover{transform:translateY(-3px);border-color:#454753}
 .cover{aspect-ratio:var(--cover-ratio);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(145deg,#1e2028,#101116)}
-.coverbg{position:absolute;inset:0;z-index:2;background-size:cover;background-position:center;background-repeat:no-repeat}.cover:has(.coverbg[style]) .covertext{display:none}.cover:has(.coverbg[style]) .coverfile{display:none}.cover:has(.coverbg[style])::before{display:none}.cover::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 210deg,transparent,rgba(255,10,145,.18),transparent,rgba(255,100,30,.13),transparent);transform:rotate(12deg)}
+.coverbg{position:absolute;inset:0;z-index:2;background-size:cover;background-position:center;background-repeat:no-repeat}.cover.withcover .covertext{display:none}.cover.withcover .coverfile{display:none}.cover.withcover::before{display:none}.cover::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 210deg,transparent,rgba(255,10,145,.18),transparent,rgba(255,100,30,.13),transparent);transform:rotate(12deg)}
 .covertext{position:relative;z-index:2;padding:16px;text-align:center;font-weight:900;font-size:clamp(14px,1.3vw,20px);line-height:1.05;text-shadow:0 2px 10px #000}
 .coverfile{position:absolute;z-index:2;left:9px;bottom:8px;right:9px;font-size:9px;color:#a7a7b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.6}
 .heart{position:absolute;right:9px;top:9px;z-index:5;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.55);color:white;cursor:pointer;font-size:18px}.heart.on{color:var(--pink);border-color:var(--pink)}
@@ -106,7 +106,11 @@ let category="Todos", favOnly=false;
 const $=s=>document.querySelector(s);
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function norm(s){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
-function coverURL(file){return COVER_BASE + String(file).split("/").map(encodeURIComponent).join("/");}
+function coverURL(file){
+  const f=String(file||"").trim();
+  if(/^https?:\/\//i.test(f)) return f;
+  return COVER_BASE + f.split("/").map(encodeURIComponent).join("/");
+}
 function money(v){return v==null?null:new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:0}).format(v)}
 function applySettings(){
  document.documentElement.style.setProperty("--pink",settings.pink);document.documentElement.style.setProperty("--orange",settings.orange);document.documentElement.style.setProperty("--bg",settings.bg);document.documentElement.style.setProperty("--panel",settings.panel);document.documentElement.style.setProperty("--cols",settings.cols);
@@ -129,7 +133,7 @@ function current(){
 }
 function render(){
  const a=current();$("#shown").textContent=a.length;$("#favCount").textContent=`${favorites.size} favorito${favorites.size===1?"":"s"}`;
- $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button><div class="coverbg" ${g.coverFile?`style="background-image:url('${coverURL(g.coverFile)}')"`:""}></div><div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
+ $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover ${g.coverFile?'withcover':''}"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button><div class="coverbg" ${g.coverFile?`style="background-image:url('${coverURL(g.coverFile)}')"`:""}></div><div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{let t=b.dataset.fav;favorites.has(t)?favorites.delete(t):favorites.add(t);localStorage.setItem("txsaf_favs",JSON.stringify([...favorites]));render()})
 }
 $("#q").oninput=render;$("#sort").onchange=render;$("#favFilter").onclick=()=>{favOnly=!favOnly;$("#favFilter").classList.toggle("active",favOnly);render()};
