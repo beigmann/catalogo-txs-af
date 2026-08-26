@@ -37,7 +37,7 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 .card{position:relative;background:linear-gradient(180deg,#15161d,#0f1015);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:.18s transform,.18s border-color}
 .card:hover{transform:translateY(-3px);border-color:#454753}
 .cover{aspect-ratio:var(--cover-ratio);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(145deg,#1e2028,#101116)}
-.cover::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 210deg,transparent,rgba(255,10,145,.18),transparent,rgba(255,100,30,.13),transparent);transform:rotate(12deg)}
+.cover img.realcover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}.cover.hasimg::before{display:none}.cover.hasimg .covertext{display:none}.cover.hasimg .coverfile{display:none}.cover::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 210deg,transparent,rgba(255,10,145,.18),transparent,rgba(255,100,30,.13),transparent);transform:rotate(12deg)}
 .covertext{position:relative;padding:16px;text-align:center;font-weight:900;font-size:clamp(14px,1.3vw,20px);line-height:1.05;text-shadow:0 2px 10px #000}
 .coverfile{position:absolute;left:9px;bottom:8px;right:9px;font-size:9px;color:#a7a7b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.6}
 .heart{position:absolute;right:9px;top:9px;z-index:2;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.55);color:white;cursor:pointer;font-size:18px}.heart.on{color:var(--pink);border-color:var(--pink)}
@@ -86,6 +86,7 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 <script>
 let ALL=[];
 const SHEET_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3Ylrz2kuRy6fI0hzmHbYMaPLOPqG1D8-dVF5iWRThrFcBDN-u4xBxfshu60ZwId9IKoynuB7boTn0/pub?gid=530474887&single=true&output=csv";
+const COVER_BASE="https://txsoficial.github.io/catalogo-txs-af/";
 function parseCSV(csv){
  const rows=[];let row=[],field="",q=false;
  for(let i=0;i<csv.length;i++){const c=csv[i],n=csv[i+1];if(q){if(c=='"'&&n=='"'){field+='"';i++;}else if(c=='"')q=false;else field+=c;}else{if(c=='"')q=true;else if(c==','){row.push(field);field="";}else if(c=='\n'){row.push(field.replace(/\r$/,""));rows.push(row);row=[];field="";}else field+=c;}}
@@ -127,7 +128,7 @@ function current(){
 }
 function render(){
  const a=current();$("#shown").textContent=a.length;$("#favCount").textContent=`${favorites.size} favorito${favorites.size===1?"":"s"}`;
- $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button><div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
+ $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover ${g.coverFile?"hasimg":""}"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button>${g.coverFile?`<img class="realcover" src="${COVER_BASE+encodeURIComponent(g.coverFile)}" alt="${esc(g.title)}" onerror="this.remove();this.parentElement.classList.remove('hasimg')">`:""}<div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{let t=b.dataset.fav;favorites.has(t)?favorites.delete(t):favorites.add(t);localStorage.setItem("txsaf_favs",JSON.stringify([...favorites]));render()})
 }
 $("#q").oninput=render;$("#sort").onchange=render;$("#favFilter").onclick=()=>{favOnly=!favOnly;$("#favFilter").classList.toggle("active",favOnly);render()};
