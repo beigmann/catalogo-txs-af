@@ -50,6 +50,10 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 @media(max-width:1000px){.shell{grid-template-columns:1fr}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border);padding:13px 18px}.brand{border:0;padding-bottom:10px}.side-title{display:none}.cats{display:flex;gap:7px;overflow:auto;padding-bottom:3px}.catbtn{width:auto;white-space:nowrap;background:#14151b}.count{margin-left:8px}.main{padding:24px 18px 70px}:root{--cols:4}}
 @media(max-width:760px){:root{--cols:3}.toolbar{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}.top{align-items:center}.subtitle{font-size:13px}}
 @media(max-width:520px){:root{--cols:2}.grid{gap:11px}.info{padding:10px}.main{padding-left:12px;padding-right:12px}.title{font-size:12px}.price{font-size:17px}}
+
+.newbadge{position:absolute;left:10px;top:10px;z-index:3;font-size:11px;font-weight:900;letter-spacing:.08em;padding:6px 9px;border-radius:999px;background:#ff641e;color:#fff;box-shadow:0 3px 10px #0003}
+.presalebadge{position:absolute;left:10px;top:42px;z-index:3;font-size:10px;font-weight:900;letter-spacing:.05em;padding:5px 8px;border-radius:999px;background:#101117;color:#fff}
+.note{margin-top:6px;font-size:12px;font-weight:700;line-height:1.3;opacity:.78}
 </style>
 </head>
 <body>
@@ -63,7 +67,7 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
  <div class="toolbar">
   <div class="search"><input id="q" placeholder="Buscar por título..."><span>⌕</span></div>
   <select id="sort"><option value="az">A → Z</option><option value="za">Z → A</option><option value="low">Menor preço</option><option value="high">Maior preço</option></select>
-  <button class="favfilter" id="favFilter">♡ Meus favoritos</button>
+  <button class="favfilter" id="favFilter">♡ Meus favoritos</button><button class="favfilter" id="presaleFilter">Pré-vendas</button>
  </div>
  <div class="meta"><div><strong id="shown">0</strong> jogos encontrados</div><div><span id="syncState" style="margin-right:16px">● Conectando à planilha…</span><span id="favCount">0 favoritos</span></div></div>
  <section class="grid" id="grid"></section>
@@ -94,13 +98,13 @@ function parseCSV(csv){
 function parsePrice(v){if(!v)return null;let s=String(v).replace(/R\$/gi,"").replace(/\s/g,"");if(s.includes(",")&&s.includes("."))s=s.replace(/\./g,"").replace(",",".");else if(s.includes(","))s=s.replace(",",".");const n=parseFloat(s.replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:null;}
 async function loadSheet(){
  $("#grid").innerHTML='<div class="empty">Carregando catálogo da planilha…</div>';
- try{const res=await fetch(SHEET_CSV+"&t="+Date.now(),{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);const rows=parseCSV(await res.text());const h=rows.shift().map(x=>x.trim());const idx=n=>h.findIndex(x=>x.toLowerCase()===n.toLowerCase());const it=idx("Título"),ic=idx("Categoria"),ip=idx("Preço"),ico=idx("Arquivo da capa"),icu=idx("Capa"),ia=idx("Ativo?"),inn=idx("Novidade?");if(it<0)throw new Error("Coluna Título não encontrada");ALL=rows.filter(r=>r[it]&&r[it].trim()).map(r=>({title:r[it].trim(),category:ic>=0&&r[ic]?r[ic].trim():"Sem categoria",price:ip>=0?parsePrice(r[ip]):null,coverFile:ico>=0&&r[ico]?r[ico].trim():"",coverUrl:icu>=0&&r[icu]?r[icu].trim():"",active:!(ia>=0&&/^(não|nao|false|0)$/i.test((r[ia]||"").trim())),new:inn>=0&&/^(sim|true|1|x|yes)$/i.test((r[inn]||"").trim())}));renderCats();render();$("#syncState").textContent="● Planilha conectada";$("#syncState").classList.add("ok");}
+ try{const res=await fetch(SHEET_CSV+"&t="+Date.now(),{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);const rows=parseCSV(await res.text());const h=rows.shift().map(x=>x.trim());const idx=n=>h.findIndex(x=>x.toLowerCase()===n.toLowerCase());const it=idx("Título"),ic=idx("Categoria"),ip=idx("Preço"),ico=idx("Arquivo da capa"),icu=idx("Capa"),ia=idx("Ativo?"),inn=idx("Novidade?"),ipv=idx("Pré-venda?"),iob=idx("Observação");if(it<0)throw new Error("Coluna Título não encontrada");ALL=rows.filter(r=>r[it]&&r[it].trim()).map(r=>({title:r[it].trim(),category:ic>=0&&r[ic]?r[ic].trim():"Sem categoria",price:ip>=0?parsePrice(r[ip]):null,coverFile:ico>=0&&r[ico]?r[ico].trim():"",coverUrl:icu>=0&&r[icu]?r[icu].trim():"",active:!(ia>=0&&/^(não|nao|false|0)$/i.test((r[ia]||"").trim())),new:inn>=0&&/^(sim|true|1|x|yes)$/i.test((r[inn]||"").trim()),presale:ipv>=0&&/^(sim|true|1|x|yes)$/i.test((r[ipv]||"").trim()),note:iob>=0&&r[iob]?r[iob].trim():""}));renderCats();render();$("#syncState").textContent="● Planilha conectada";$("#syncState").classList.add("ok");}
  catch(e){$("#grid").innerHTML='<div class="empty"><b>Não consegui carregar a Google Sheets.</b><br><br>Confira se a aba continua publicada como CSV e recarregue a página.<br><small>'+e.message+'</small></div>';$("#syncState").textContent="● Sem conexão com a planilha";}
 }
 const defaults={title:"CATÁLOGO DE JOGOS",subtitle:"Encontre seu próximo jogo favorito.",pink:"#ff0a91",orange:"#ff641e",bg:"#08090d",panel:"#101117",cols:6,whats:""};
 let settings={...defaults,...JSON.parse(localStorage.getItem("txsaf_settings")||"{}")};
 let favorites=new Set(JSON.parse(localStorage.getItem("txsaf_favs")||"[]"));
-let category="Todos", favOnly=false;
+let category="Todos", favOnly=false, presaleOnly=false;
 
 const $=s=>document.querySelector(s);
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -120,7 +124,7 @@ function renderCats(){
  document.querySelectorAll(".catbtn").forEach(b=>b.onclick=()=>{category=b.dataset.cat;renderCats();render()})
 }
 function current(){
- let q=norm($("#q").value);let a=ALL.filter(x=>x.active).filter(x=>category==="Todos"||x.category===category).filter(x=>!q||norm(x.title).includes(q)).filter(x=>!favOnly||favorites.has(x.title));
+ let q=norm($("#q").value);let a=ALL.filter(x=>x.active).filter(x=>category==="Todos"||x.category===category).filter(x=>!q||norm(x.title).includes(q)).filter(x=>!favOnly||favorites.has(x.title)).filter(x=>!presaleOnly||x.presale);
  const s=$("#sort").value;
  a.sort((x,y)=>s==="za"?y.title.localeCompare(x.title,"pt-BR"):s==="low"?(x.price??1e9)-(y.price??1e9):s==="high"?(y.price??-1)-(x.price??-1):x.title.localeCompare(y.title,"pt-BR"));
  return a;
@@ -133,10 +137,11 @@ function imageUrl(url){
 }
 function render(){
  const a=current();$("#shown").textContent=a.length;$("#favCount").textContent=`${favorites.size} favorito${favorites.size===1?"":"s"}`;
- $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button>${g.coverUrl?`<img class="realcover" src="${esc(imageUrl(g.coverUrl))}" alt="${esc(g.title)}" onload="this.parentElement.classList.add('cover-ok')" onerror="this.remove()">`:""}<div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
+ $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button>${g.new?`<div class="newbadge">NOVO</div>`:""}${g.presale?`<div class="presalebadge">PRÉ-VENDA</div>`:""}${g.coverUrl?`<img class="realcover" src="${esc(imageUrl(g.coverUrl))}" alt="${esc(g.title)}" onload="this.parentElement.classList.add('cover-ok')" onerror="this.remove()">`:""}<div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div>${g.note?`<div class="note">${esc(g.note)}</div>`:""}</div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{let t=b.dataset.fav;favorites.has(t)?favorites.delete(t):favorites.add(t);localStorage.setItem("txsaf_favs",JSON.stringify([...favorites]));render()})
 }
 $("#q").oninput=render;$("#sort").onchange=render;$("#favFilter").onclick=()=>{favOnly=!favOnly;$("#favFilter").classList.toggle("active",favOnly);render()};
+$("#presaleFilter").onclick=()=>{presaleOnly=!presaleOnly;$("#presaleFilter").classList.toggle("active",presaleOnly);render()};
 $("#sendFav").onclick=()=>{if(!favorites.size)return alert("Marque alguns jogos no coração primeiro 😊");let list=[...favorites].sort((a,b)=>a.localeCompare(b,"pt-BR"));let msg="Olá! Separei estes jogos no catálogo:%0A%0A"+list.map(x=>"• "+encodeURIComponent(x)).join("%0A");let n=(settings.whats||"").replace(/\D/g,"");let url=n?`https://wa.me/55${n}?text=${msg}`:`https://wa.me/?text=${msg}`;window.open(url,"_blank")};
 $("#gear").onclick=()=>$("#drawer").classList.add("open");$("#closeDrawer").onclick=()=>$("#drawer").classList.remove("open");
 $("#saveSettings").onclick=()=>{settings={title:$("#setTitle").value||defaults.title,subtitle:$("#setSubtitle").value||defaults.subtitle,pink:$("#setPink").value,orange:$("#setOrange").value,bg:$("#setBg").value,panel:$("#setPanel").value,cols:Math.max(3,Math.min(8,+$("#setCols").value||6)),whats:$("#setWhats").value};localStorage.setItem("txsaf_settings",JSON.stringify(settings));applySettings();$("#drawer").classList.remove("open")};
