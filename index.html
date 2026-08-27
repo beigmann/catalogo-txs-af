@@ -54,6 +54,14 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 .newbadge{position:absolute;left:10px;top:10px;z-index:3;font-size:11px;font-weight:900;letter-spacing:.08em;padding:6px 9px;border-radius:999px;background:#ff641e;color:#fff;box-shadow:0 3px 10px #0003}
 .presalebadge{position:absolute;left:10px;top:42px;z-index:3;font-size:10px;font-weight:900;letter-spacing:.05em;padding:5px 8px;border-radius:999px;background:#101117;color:#fff}
 .note{margin-top:6px;font-size:12px;font-weight:700;line-height:1.3;opacity:.78}
+
+/* Correção de camadas: capa abaixo dos selos */
+.cover{position:relative}
+.realcover{position:absolute;inset:0;z-index:1}
+.covertext,.coverfile{position:relative;z-index:0}
+.newbadge,.presalebadge{z-index:4}
+.heart{z-index:5}
+
 </style>
 </head>
 <body>
