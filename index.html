@@ -62,6 +62,13 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 .newbadge,.presalebadge{z-index:4}
 .heart{z-index:5}
 
+
+/* Selos sempre acima da capa real */
+.cover .realcover{z-index:1 !important;}
+.cover .newbadge,
+.cover .presalebadge{position:absolute !important;z-index:100 !important;display:block !important;}
+.cover .heart{z-index:110 !important;}
+
 </style>
 </head>
 <body>
