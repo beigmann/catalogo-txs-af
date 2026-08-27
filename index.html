@@ -125,9 +125,15 @@ function current(){
  a.sort((x,y)=>s==="za"?y.title.localeCompare(x.title,"pt-BR"):s==="low"?(x.price??1e9)-(y.price??1e9):s==="high"?(y.price??-1)-(x.price??-1):x.title.localeCompare(y.title,"pt-BR"));
  return a;
 }
+function imageUrl(url){
+ if(!url)return "";
+ return url
+  .replace("https://beigmann.github.io/catalogo-txs-af/Capas/","https://raw.githubusercontent.com/beigmann/catalogo-txs-af/refs/heads/main/Capas/")
+  .replace("https://beigmann.github.io/catalogo-txs-af/","https://raw.githubusercontent.com/beigmann/catalogo-txs-af/refs/heads/main/");
+}
 function render(){
  const a=current();$("#shown").textContent=a.length;$("#favCount").textContent=`${favorites.size} favorito${favorites.size===1?"":"s"}`;
- $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button>${g.coverUrl?`<img class="realcover" src="${esc(g.coverUrl)}" alt="${esc(g.title)}" onload="this.parentElement.classList.add('cover-ok')" onerror="this.remove()">`:""}<div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
+ $("#grid").innerHTML=a.length?a.map(g=>`<article class="card"><div class="cover"><button class="heart ${favorites.has(g.title)?"on":""}" data-fav="${esc(g.title)}">${favorites.has(g.title)?"♥":"♡"}</button>${g.coverUrl?`<img class="realcover" src="${esc(imageUrl(g.coverUrl))}" alt="${esc(g.title)}" onload="this.parentElement.classList.add('cover-ok')" onerror="this.remove()">`:""}<div class="covertext">${esc(g.title)}</div>${g.coverFile?`<div class="coverfile">✓ ${esc(g.coverFile)}</div>`:""}</div><div class="info"><div class="title">${esc(g.title)}</div><div class="price">${g.price!=null?money(g.price):'<span class="consult">Consultar valor</span>'}</div></div></article>`).join(""):`<div class="empty">Nenhum jogo encontrado com esses filtros.</div>`;
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{let t=b.dataset.fav;favorites.has(t)?favorites.delete(t):favorites.add(t);localStorage.setItem("txsaf_favs",JSON.stringify([...favorites]));render()})
 }
 $("#q").oninput=render;$("#sort").onchange=render;$("#favFilter").onclick=()=>{favOnly=!favOnly;$("#favFilter").classList.toggle("active",favOnly);render()};
