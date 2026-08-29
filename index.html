@@ -503,6 +503,36 @@ body:not(.home-open) .home{
     animation:none;
   }
 }
+.hero-stage{
+  display:flex !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:360px !important;
+  overflow:visible !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+.hero-stage .hero-art{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative !important;
+  width:min(1000px,96vw) !important;
+  max-width:1000px !important;
+  height:auto !important;
+  max-height:none !important;
+  margin:0 auto !important;
+  object-fit:contain !important;
+  transform:none !important;
+  animation:none !important;
+  filter:none !important;
+}
+
+.hero-stage::before,
+.hero-stage::after{
+  display:none !important;
+}
 </style>
 </head>
 <body class="home-open">
