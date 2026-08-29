@@ -112,6 +112,10 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
   isolation:isolate;
   overflow:visible;
 }
+.hero-stage::before,
+.hero-stage::after{
+  display:none !important;
+}
 
 /* ENERGIAS LATERAIS */
 .hero-stage::before,
@@ -161,20 +165,17 @@ select,.favfilter{height:46px;border:1px solid var(--border);background:#0d0e13;
 /* RAPOSA + DRAGÃO */
 .hero-art{
   display:block;
-  width:auto;
+  width:min(1000px, 96vw);
+  max-width:none;
   height:auto;
-  max-height:310px;
-  max-width:430px;
+  max-height:none;
   object-fit:contain;
   position:relative;
   z-index:2;
-  filter:
-    drop-shadow(-15px 0 24px rgba(255,10,145,.18))
-    drop-shadow(15px 0 24px rgba(255,100,30,.18));
-  animation:heroFloat 5s ease-in-out infinite;
-  transform-origin:center;
+  filter:none;
+  animation:none;
+  transform:none;
 }
-
 /* MOVIMENTO CENTRAL */
 @keyframes heroFloat{
   0%,100%{
