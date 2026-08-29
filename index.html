@@ -94,6 +94,22 @@ body.home-open .shell,body.home-open .floating{display:none}body:not(.home-open)
 @media(max-width:430px){.hero-stage{height:275px;margin:0 auto -28px}.hero-art{height:245px;max-width:82%}.highlights{grid-template-columns:repeat(2,1fr)}.home-title{font-size:46px}}
 @media(prefers-reduced-motion:reduce){.hero-art,.hero-stage::before,.hero-stage::after{animation:none}}
 
+
+/* ===== HOME FIX v2 — proporções e movimento ===== */
+.home{min-height:100vh;padding:18px 22px 30px;background:#050506;overflow-x:hidden}
+.home-inner{width:min(1080px,100%);margin:0 auto}
+.hero-stage{height:360px;width:100%;margin:0 auto -28px;overflow:visible;display:flex;align-items:center;justify-content:center}
+.hero-stage::before,.hero-stage::after{top:12%;bottom:12%;width:38%;filter:blur(22px) saturate(1.35);opacity:.72;will-change:transform,opacity}
+.hero-stage::before{left:-9%;animation:pinkPulse 5.8s ease-in-out infinite alternate}
+.hero-stage::after{right:-9%;animation:orangePulse 6.4s ease-in-out infinite alternate}
+.hero-art{width:clamp(210px,26vw,330px) !important;height:auto !important;max-width:none !important;max-height:330px !important;object-fit:contain;animation:heroFloatFixed 5s ease-in-out infinite !important;will-change:transform}
+@keyframes heroFloatFixed{0%,100%{transform:translateY(5px)}50%{transform:translateY(-7px)}}
+@keyframes pinkPulse{0%{transform:translate(-4%,2%) scale(.96) rotate(-2deg);opacity:.58}100%{transform:translate(5%,-2%) scale(1.08) rotate(2deg);opacity:.88}}
+@keyframes orangePulse{0%{transform:translate(4%,-2%) scale(1.06) rotate(2deg);opacity:.84}100%{transform:translate(-5%,3%) scale(.96) rotate(-2deg);opacity:.58}}
+.home-title{margin-top:0}
+@media(max-width:760px){.hero-stage{height:285px;margin:0 auto -18px}.hero-art{width:clamp(190px,56vw,270px) !important;max-height:270px !important}.hero-stage::before,.hero-stage::after{width:46%;top:15%;bottom:15%}}
+@media(max-width:430px){.hero-stage{height:245px;margin:0 auto -10px}.hero-art{width:min(220px,62vw) !important;max-height:220px !important}}
+
 </style>
 </head>
 <body class="home-open">
